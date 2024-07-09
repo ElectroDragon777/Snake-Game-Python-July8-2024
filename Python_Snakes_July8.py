@@ -97,14 +97,14 @@ class Food:
         return Food_X, Food_Y
     
     def Draw_Food(self):
-        PythonSnakes.Draw.Rect(Game_Window, RED, (self.Position[0], self.Position[1], Grid_Size, Grid_Size))
+        PythonSnakes.Draw.Rect(Game_Window, Red, (self.Position[0], self.Position[1], Grid_Size, Grid_Size))
 
 # Class callings:
 Window_Snake = Snake()
 Window_Food = Food()
 
 Game_Running = True
-Game_Clock = PythonSnakes.time.Clock()
+Game_Clock = PythonSnakes.time.clock()
 Game_Over = False
 
 # Game is running. Now play the game.
@@ -151,4 +151,4 @@ while Game_Running:
         Game_Window.Blit(Game_Over_Text, Game_Over_Rectangle)
         
     PythonSnakes.Display.Update()
-    Clock.tick(FPS)
+    PythonSnakes.time.clock.tick(FPS)
