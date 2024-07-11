@@ -23,6 +23,7 @@ Green = (0, 255, 0)
 
 Score = 0
 Best_Score = 0
+clock = PythonSnakes.time.Clock()
 # Window
 Game_Window = PythonSnakes.display.set_mode((Width, Height))
 PythonSnakes.display.set_caption("Snakes Game - v.1.0a")
@@ -36,37 +37,31 @@ class Snake:
         self.Size = 1
         self.Body = [(Width//2, Height//2)]
         # Default starting to right direction
-        self.Direction = "Right"
+        self.Direction = "RIGHT"
     
-    def Move(self): # Snake movement.
+    def Move(self):
         Snake_Head = self.Body[0]
-        SH_X,SH_Y = Snake_Head
-        
-        # Directions - depending on direction, x or y change.
-        match self.Direction:
-            case "Up":
-                SH_Y -= Grid_Size
-            case "Down":
-                SH_Y += Grid_Size
-            case "Right":
-                SH_X += Grid_Size
-            case "Left":
-                SH_X -= Grid_Size
-        
-        """ if self.Direction == "Up":
+        SH_X, SH_Y = Snake_Head
+
+        if self.Direction == "UP":
+            SH_Y -= Grid_Size
+        elif self.Direction == "DOWN":
             SH_Y += Grid_Size
-        elif self. """
-        
-        self.Body.insert(0, (SH_X,SH_Y))
-        
+        elif self.Direction == "RIGHT":
+            SH_X += Grid_Size
+        elif self.Direction == "LEFT":
+            SH_X -= Grid_Size
+
+        self.Body.insert(0, (SH_X, SH_Y))
+
         if len(self.Body) > self.Size:
             self.Body.pop()
     
     # Direction Changes
     def Direction_Change(self, New_Direction):
-        if New_Direction in ("Up", "Down", "Right", "Left"):
+        if New_Direction in ("UP", "DOWN", "RIGHT", "LEFT"):
             # Complex IF - Disallow Opposite direction movement
-            if (New_Direction == "Up" and self.Direction != "Down") or (New_Direction == "Down" and self.Direction != "Up") or (New_Direction == "Right" and self.Direction != "Left") or (New_Direction == "Left" and self.Direction != "Right"): 
+            if (New_Direction == "UP" and self.Direction != "DOWN") or (New_Direction == "DOWN" and self.Direction != "UP") or (New_Direction == "RIGHT" and self.Direction != "LEFT") or (New_Direction == "LEFT" and self.Direction != "RIGHT"): 
                 self.Direction = New_Direction
     
     # Score increase (by eating the apples, or just the food in general :3 )
@@ -78,15 +73,15 @@ class Snake:
         Snake_Head = self.Body[0]
         if Snake_Head[0] < 0 or Snake_Head[0] >= Width or Snake_Head[1] < 0 or Snake_Head[1] >= Width:
             return True
-        if Snake_Head in self.Body[1]:
+        if Snake_Head in self.Body[0]:
             return True
         return False
     
     # Draw the snake. Or you will be invisible. Hard mode possibility?
     def Draw_Snake(self):
         for SH_X, SH_Y in self.Body:
-            PythonSnakes.Draw.Rect(Game_Window, Green, Grid_Size, Grid_Size)
-
+            rect = PythonSnakes.Rect(SH_X, SH_Y, Grid_Size, Grid_Size)
+            PythonSnakes.draw.rect(Game_Window, Green, rect)
 # Apple / Food:
 class Food:
     def __init__(self):
@@ -97,58 +92,55 @@ class Food:
         return Food_X, Food_Y
     
     def Draw_Food(self):
-        PythonSnakes.Draw.Rect(Game_Window, Red, (self.Position[0], self.Position[1], Grid_Size, Grid_Size))
+        PythonSnakes.draw.rect(Game_Window, Red, (self.Position[0], self.Position[1], Grid_Size, Grid_Size))
 
 # Class callings:
 Window_Snake = Snake()
 Window_Food = Food()
 
 Game_Running = True
-Game_Clock = PythonSnakes.time.clock()
+Game_Clock = PythonSnakes.time.Clock()
 Game_Over = False
 
 # Game is running. Now play the game.
+Game_Window.fill(Black)
 while Game_Running:
     # Register input.
     for Event_Executed in PythonSnakes.event.get():
-        if Event_Executed.type == PythonSnakes.quit():
-            Game_Running = False
-        elif Event_Executed.type == PythonSnakes.KEYDOWN:
-            match Event_Executed.Key:
-                case "Up":
-                    Snake.Direction_Change("Up")
-                case "Down":
-                    Snake.Direction_Change("Down")
-                case "Left":
-                    Snake.Direction_Change("Left")
-                case "Right":
-                    Snake.Direction_Change("Right")
+        if Event_Executed.type == PythonSnakes.KEYDOWN:
+            if Event_Executed.key == "UP":
+                    Snake.Direction_Change("UP")
+            elif Event_Executed.key == "DOWN":
+                    Snake.Direction_Change("DOWN")
+            elif Event_Executed.key == "LEFT":
+                    Snake.Direction_Change("LEFT")
+            elif Event_Executed.key == "RIGHT":
+                    Snake.Direction_Change("RIGHT")
 
     # Game over check. If no, snake moves. 
     if not Game_Over:
-        Snake.Move(self=Snake)
+        Window_Snake.Move()
         
         # Food consumption.
-        if Snake.Body[0] == Food.Position:
-            Snake.Food_Collision()
-            Food.Position = Food.Generate_Placement_X_Y()
+        if Window_Snake.Body[0] == Window_Food.Position:
+            Window_Snake.Food_Collision()
+            Window_Food.Position = Window_Food.Generate_Placement_X_Y()
             Score += 1
             
-        if Snake.Collision_Check():
+        if Window_Snake.Collision_Check():
             Game_Over = True
-        
-    Game_Window.Fill(Black)
     
-    Snake.Draw_Snake()
-    Food.Draw_Food()
-    
-    Score_Text = Font.Render(f"Score: {Score}", True, White)
-    Game_Window.Blit(Score_Text, (10, 10))
+    Window_Snake.Draw_Snake()
+    Window_Food.Draw_Food()
+    Game_Clock.tick(FPS)
+    PythonSnakes.display.flip()
+    Score_Text = Font.render(f"Score: {Score}", True, White)
+    Game_Window.blit(Score_Text, (10, 10))
     
     if Game_Over:
-        Game_Over_Text = Font.Render("Game Over", True, White)
-        Game_Over_Rectangle = Game_Over_Text.Get_Rect(center = (Width//2, Height//2))
-        Game_Window.Blit(Game_Over_Text, Game_Over_Rectangle)
+        Game_Over_Text = Font.render("Game Over", True, White)
+        Game_Over_Rectangle = Game_Over_Text.get_rect(center = (Width//2, Height//2))
+        Game_Window.blit(Game_Over_Text, Game_Over_Rectangle)
+        Game_Running = False
         
-    PythonSnakes.Display.Update()
-    PythonSnakes.time.clock.tick(FPS)
+    PythonSnakes.display.update()
